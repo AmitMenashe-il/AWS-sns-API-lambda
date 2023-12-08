@@ -1,8 +1,9 @@
 import time
-from aws_sns_funcs import create_sns_topic, create_sns_subscription, create_sns_trigger, check_sns_protocol_subscribed, check_sns_topic_existence, get_topic_arn_by_name
-from aws_lambda_funcs import create_lambda, get_lambda_function_arn_by_name, delete_lambda_function, update_lambda_code_file,create_zip_from_py, check_lambda_exists
-from api_gw_func import create_api_gateway, create_api_trigger, check_api_gateway_id_by_name, get_api_gateway_id_by_name
+from aws_sns_funcs import create_sns_topic, create_sns_subscription, check_sns_protocol_subscribed, check_sns_topic_existence, get_topic_arn_by_name
+from aws_lambda_funcs import create_lambda, get_lambda_function_arn_by_name, delete_lambda_function, check_lambda_exists, create_api_trigger, create_sns_trigger
+from api_gw_func import create_api_gateway,  check_api_gateway_id_by_name, get_api_gateway_id_by_name
 from aws_IAM_funcs import create_lambda_role_and_assign_policy
+from lambda_code_funcs import update_lambda_code_file,create_zip_from_py
 from lambda_tests import run_tests
 
 

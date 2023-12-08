@@ -17,21 +17,6 @@ def create_api_gateway(api_name: str, lambda_name: str, lambda_arn: str) -> str:
         print(f'\t api gateway no created {E}')
 
 
-def create_api_trigger(lambda_name: str, api_id: str):
-    lambdaC = boto3.client('lambda')
-    try:
-        lambdaC.add_permission(
-            FunctionName=lambda_name,
-            StatementId='AllowInvokeFromApiGateway',
-            Action='lambda:InvokeFunction',
-            Principal='apigateway.amazonaws.com',
-            SourceArn=f'arn:aws:execute-api:us-east-1:264782567005:{api_id}/*/POST/{lambda_name}'
-        )
-        print(f'created trigger for {lambda_name} by api')
-    except ClientError as E:
-        print(f'\terror creating api gateway trigger to lambda {E}')
-
-
 def get_api_gateway_id_by_name(api_name: str) -> str:
     apiGateway_client = boto3.client('apigatewayv2')
 

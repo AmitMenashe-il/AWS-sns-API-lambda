@@ -1,5 +1,4 @@
 import boto3
-from zipfile import ZipFile
 import os
 
 
@@ -54,32 +53,32 @@ def delete_lambda_function(lambda_function_name: str):
         print(f"\tLambda function '{lambda_function_name}' not deleted, {E}")
 
 
-def update_lambda_code_file(file_name: str, new_topic_arn: str):
-    updated_lines = []
-
+def create_api_trigger(lambda_name: str, api_id: str):
+    client = boto3.client('lambda')
     try:
-        with open(file_name, 'r') as file:
-            lines = file.readlines()
-
-        for line in lines:
-            if line.startswith('    topic_arn = '):
-                updated_lines.append(f"    topic_arn = '{new_topic_arn}'\n")
-            else:
-                updated_lines.append(line)
-
-        with open(file_name, 'w') as file:
-            file.writelines(updated_lines)
-
-        print(f'lambda code file {file_name} updated with new topic ARN')
-    except Exception as E:
-        print(f'\tcant update lambda code file {file_name}! {E}')
+        client.add_permission(
+            FunctionName=lambda_name,
+            StatementId='AllowInvokeFromApiGateway',
+            Action='lambda:InvokeFunction',
+            Principal='apigateway.amazonaws.com',
+            SourceArn=f'arn:aws:execute-api:us-east-1:264782567005:{api_id}/*/POST/{lambda_name}'
+        )
+        print(f'created trigger for {lambda_name} by api')
+    except ClientError as E:
+        print(f'\terror creating api gateway trigger to lambda {E}')
 
 
-def create_zip_from_py(file_name: str):
-    zip_file_name = file_name.replace('.py', '.zip')
+def create_sns_trigger(lambda_name: str, topic_arn: str):
+    client = boto3.client('lambda')
     try:
-        with ZipFile(zip_file_name, 'w') as z:
-            z.write(file_name)
-    except Exception as E:
-        print(f'\tCant create lambda zip file {zip_file_name} from {file_name}, {E}')
-    print('lambda zip file created')
+        client.add_permission(
+            FunctionName=lambda_name,
+            StatementId='sns-trigger',
+            Action='lambda:InvokeFunction',
+            Principal='sns.amazonaws.com',
+            SourceArn=topic_arn
+        )
+        topic_name = topic_arn.split(':')[-1]
+        print(f'created trigger for {lambda_name} for topic {topic_name}')
+    except ClientError as E:
+        print(f'\tLambda trigger to topic {topic_arn} not created, {E}')

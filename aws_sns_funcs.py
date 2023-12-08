@@ -17,6 +17,19 @@ def format_sns_message_attribute(data_type: str, value: str) -> dict:
         }
 
 
+def send_sns_message(topic_arn: str, num1: str, num2: str) -> str:
+    # uses a format function to send the numbers in the SNS message, please note reminder in format function
+
+    sns = boto3.client('sns')
+    message = f"Message sent by SNS - numbers: {num1} and {num2}"
+    messageAttributes = {
+        "Num1": format_sns_message_attribute("Number", num1),
+        "Num2": format_sns_message_attribute("Number", num2)
+    }
+    sns.publish(TopicArn=topic_arn, Message=message, MessageAttributes=messageAttributes)
+    return message
+
+
 def create_sns_topic(name: str) -> str:
     sns = boto3.client('sns')
     try:
@@ -44,22 +57,6 @@ def check_sns_protocol_subscribed(topic_arn: str, protocol: str, email: str) -> 
     return False
 
 
-def create_sns_trigger(lambda_name: str, topic_arn: str):
-    client = boto3.client('lambda')
-    try:
-        client.add_permission(
-            FunctionName=lambda_name,
-            StatementId='sns-trigger',
-            Action='lambda:InvokeFunction',
-            Principal='sns.amazonaws.com',
-            SourceArn=topic_arn
-        )
-        topic_name = topic_arn.split(':')[-1]
-        print(f'created trigger for {lambda_name} for topic {topic_name}')
-    except ClientError as E:
-        print(f'\tLambda trigger to topic {topic_arn} not created, {E}')
-
-
 def get_topic_arn_by_name(topic_name: str) -> str:
     sns_client = boto3.client('sns')
     response = sns_client.list_topics()
@@ -76,14 +73,3 @@ def check_sns_topic_existence(topic_name: str) -> bool:
     return False
 
 
-def send_sns_message(topic_arn: str, num1: str, num2: str) -> str:
-    # uses a format function to send the numbers in the SNS message, please note reminder in format function
-
-    sns = boto3.client('sns')
-    message = f"Message sent by SNS - numbers: {num1} and {num2}"
-    messageAttributes = {
-        "Num1": format_sns_message_attribute("Number", num1),
-        "Num2": format_sns_message_attribute("Number", num2)
-    }
-    sns.publish(TopicArn=topic_arn, Message=message, MessageAttributes=messageAttributes)
-    return message
