@@ -1,0 +1,6 @@
+{
+        "OnSuccess": {
+            "Destination": "{{TOPIC_ARN}}"
+        }
+    }
+}
